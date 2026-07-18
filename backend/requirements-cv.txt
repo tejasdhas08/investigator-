@@ -1,0 +1,10 @@
+# Stage 2 (GPU worker) extras — install on worker-gpu image only.
+ultralytics>=8.2
+opencv-python-headless>=4.9
+insightface>=0.7.3
+onnxruntime-gpu>=1.17 ; platform_machine == "x86_64"
+onnxruntime>=1.17 ; platform_machine != "x86_64"
+open-clip-torch>=2.24
+torch>=2.2
+scenedetect[opencv]>=0.6.3
+numpy>=1.26

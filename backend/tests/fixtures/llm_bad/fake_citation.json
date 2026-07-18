@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "overall_summary": "Summary.",
+  "narrative_sections": [
+    {
+      "section_index": 0,
+      "time_range_ms": [0, 10000],
+      "heading": "Fabricated evidence",
+      "text": "Person A then left the country by plane [e:ffffffff-0000-0000-0000-000000000000, conf 0.99].",
+      "cited_event_ids": ["ffffffff-0000-0000-0000-000000000000"]
+    }
+  ],
+  "person_summaries": [],
+  "suspicious_activity_summary": [],
+  "uncertainties": [],
+  "evidence_gaps": [],
+  "disclaimer": ""
+}

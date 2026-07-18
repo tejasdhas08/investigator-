@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "overall_summary": "Summary.",
+  "narrative_sections": [
+    {
+      "section_index": 0,
+      "time_range_ms": [0, 10000],
+      "heading": "Overclaim",
+      "text": "It is clear that Person A attacked Person B in a premeditated assault.",
+      "cited_event_ids": []
+    }
+  ],
+  "person_summaries": [],
+  "suspicious_activity_summary": [],
+  "uncertainties": [],
+  "evidence_gaps": [],
+  "disclaimer": ""
+}
