@@ -132,54 +132,54 @@ export default function NewCase() {
     <div className="mx-auto max-w-2xl p-6">
       <h1 className="mb-2 text-2xl font-bold">New Case</h1>
       <div className="mb-6 text-sm text-slate-500">Step {step} of 3</div>
-      {error && <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-800">{error}</div>}
+      {error && <div className="mb-4 rounded-md bg-red-950/60 p-3 text-sm text-red-300">{error}</div>}
 
       {step === 1 && (
-        <form onSubmit={createCase} className="rounded bg-white p-6 shadow-sm">
+        <form onSubmit={createCase} className="surface p-6">
           <label className="mb-1 block text-sm font-medium">Case number</label>
-          <input className="mb-3 w-full rounded border p-2" value={caseNumber}
+          <input className="mb-3 w-full rounded-md border p-2" value={caseNumber}
                  onChange={(e) => setCaseNumber(e.target.value)} required placeholder="CASE-2026-014" />
           <label className="mb-1 block text-sm font-medium">Title</label>
-          <input className="mb-3 w-full rounded border p-2" value={title}
+          <input className="mb-3 w-full rounded-md border p-2" value={title}
                  onChange={(e) => setTitle(e.target.value)} required />
           <label className="mb-1 block text-sm font-medium">
             What do you believe happened? <span className="font-normal text-slate-500">(treated as a hypothesis, not evidence)</span>
           </label>
-          <textarea className="mb-4 w-full rounded border p-2" rows={4} value={context}
+          <textarea className="mb-4 w-full rounded-md border p-2" rows={4} value={context}
                     onChange={(e) => setContext(e.target.value)} required />
-          <button disabled={busy} className="rounded bg-slate-800 px-4 py-2 text-white disabled:opacity-50">
+          <button disabled={busy} className="rounded bg-sky-600 px-4 py-2 text-white hover:bg-sky-500 disabled:opacity-50">
             Continue
           </button>
         </form>
       )}
 
       {step === 2 && (
-        <div className="rounded bg-white p-6 shadow-sm">
+        <div className="surface p-6">
           <label className="mb-2 block text-sm font-medium">Video / photo files</label>
           <input type="file" multiple accept="video/*,image/*" onChange={(e) => addFiles(e.target.files)}
                  className="mb-4 block text-sm" />
           <ul className="mb-4 space-y-1">
             {files.map((f, i) => (
-              <li key={i} className="flex justify-between rounded bg-slate-50 px-3 py-1.5 text-sm">
+              <li key={i} className="flex justify-between rounded bg-slate-800/60 px-3 py-1.5 text-sm">
                 <span>{f.file.name}</span>
                 <span className="text-slate-500">{f.progress}{f.error ? ` — ${f.error}` : ""}</span>
               </li>
             ))}
           </ul>
           <button disabled={busy || files.length === 0} onClick={uploadAllAndContinue}
-                  className="rounded bg-slate-800 px-4 py-2 text-white disabled:opacity-50">
+                  className="rounded bg-sky-600 px-4 py-2 text-white hover:bg-sky-500 disabled:opacity-50">
             {busy ? "Uploading…" : "Upload & continue"}
           </button>
         </div>
       )}
 
       {step === 3 && (
-        <div className="rounded bg-white p-6 shadow-sm">
+        <div className="surface p-6">
           <h2 className="mb-2 font-medium">Optional: suspect reference photo</h2>
           <p className="mb-3 text-xs text-slate-500">
             The tool reports algorithmic facial similarity only — never identity confirmation.
           </p>
-          <input className="mb-3 w-full rounded border p-2 text-sm" placeholder="Reference label, e.g. 'Suspect from robbery #4411'"
+          <input className="mb-3 w-full rounded-md border p-2 text-sm" placeholder="Reference label, e.g. 'Suspect from robbery #4411'"
                  value={suspectName} onChange={(e) => setSuspectName(e.target.value)} />
           <input type="file" accept="image/*" onChange={(e) => setSuspectFile(e.target.files?.[0] ?? null)}
                  className="mb-4 block text-sm" />

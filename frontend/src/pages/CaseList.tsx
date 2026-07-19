@@ -29,19 +29,19 @@ export default function CaseList() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Cases</h1>
         <div className="flex items-center gap-3">
-          {user?.role === "admin" && <Link to="/admin" className="text-sm text-slate-600 underline">Admin</Link>}
+          {user?.role === "admin" && <Link to="/admin" className="text-sm text-slate-400 underline">Admin</Link>}
           <span className="text-sm text-slate-500">{user?.full_name} ({user?.role})</span>
           <button onClick={() => logout().then(() => navigate("/login"))}
-                  className="text-sm text-slate-600 underline">Sign out</button>
-          <Link to="/cases/new" className="rounded bg-slate-800 px-4 py-2 text-sm font-medium text-white">
+                  className="text-sm text-slate-400 underline">Sign out</button>
+          <Link to="/cases/new" className="rounded bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500">
             New Case
           </Link>
         </div>
       </div>
       <div className="mb-4 flex gap-2">
         <input placeholder="Search title or case number…" value={q} onChange={(e) => setQ(e.target.value)}
-               className="w-72 rounded border p-2 text-sm" />
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded border p-2 text-sm">
+               className="w-72 rounded-md border p-2 text-sm" />
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-md border p-2 text-sm">
           <option value="">All statuses</option>
           {["created", "queued", "ingesting", "detecting", "narrating", "complete", "failed", "archived"].map(
             (s) => <option key={s} value={s}>{s}</option>,
@@ -49,16 +49,16 @@ export default function CaseList() {
         </select>
       </div>
       {isLoading ? <Spinner /> : (
-        <table className="w-full rounded bg-white shadow-sm">
+        <table className="w-full surface overflow-hidden">
           <thead>
-            <tr className="border-b text-left text-xs uppercase text-slate-500">
+            <tr className="border-b border-slate-800 text-left text-xs uppercase text-slate-500">
               <th className="p-3">Case #</th><th className="p-3">Title</th>
               <th className="p-3">Status</th><th className="p-3">People</th><th className="p-3">Created</th>
             </tr>
           </thead>
           <tbody>
             {data?.items.map((c) => (
-              <tr key={c.id} className="cursor-pointer border-b last:border-0 hover:bg-slate-50"
+              <tr key={c.id} className="cursor-pointer border-b border-slate-800 last:border-0 hover:bg-slate-800/60"
                   onClick={() => navigate(PROCESSING.includes(c.status) || c.status === "created"
                     ? `/cases/${c.id}/processing` : `/cases/${c.id}`)}>
                 <td className="p-3 font-mono text-sm">{c.case_number}</td>

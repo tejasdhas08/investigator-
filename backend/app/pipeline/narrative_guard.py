@@ -100,6 +100,18 @@ def guard_narrative(doc: NarrativeDoc, timeline: CaseTimeline) -> tuple[Narrativ
         s.requires_human_review = True
     doc.overall_summary = doc.overall_summary.strip()
 
+    # Hypothesis check: drop any citation that doesn't resolve to a real event, and
+    # never let a claim be marked 'supported'/'contradicted' with zero backing events —
+    # downgrade those to 'unsupported' so the UI can't imply evidence that isn't there.
+    if doc.hypothesis_check is not None:
+        for claim in doc.hypothesis_check.claims:
+            claim.cited_event_ids = [
+                i for i in claim.cited_event_ids if i in events_by_id or i[:8] in events_by_id
+            ]
+            if claim.verdict in ("supported", "contradicted", "partially_supported") \
+                    and not claim.cited_event_ids:
+                claim.verdict = "unsupported"
+
     doc.disclaimer = LEGAL_DISCLAIMER  # injected in code, never trusted from the model
     report.ok = True
     return doc, report

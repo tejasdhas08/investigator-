@@ -39,42 +39,42 @@ export default function AdminPage() {
       <Link to="/cases" className="text-sm text-slate-500 underline">← Cases</Link>
       <h1 className="mb-6 mt-2 text-2xl font-bold">Administration</h1>
 
-      <div className={`mb-6 rounded p-3 text-sm ${chainQ.data?.ok ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
+      <div className={`mb-6 rounded p-3 text-sm ${chainQ.data?.ok ? "bg-emerald-950/60 text-emerald-300 ring-1 ring-emerald-800" : "bg-red-50 text-red-300"}`}>
         Audit chain: {chainQ.isLoading ? "verifying…" : chainQ.data?.ok ? "intact ✓" : `BROKEN at row ${chainQ.data?.first_broken_row_id}`}
       </div>
 
-      <div className="mb-6 rounded bg-white p-4 shadow-sm">
+      <div className="mb-6 surface p-4">
         <h2 className="mb-3 font-semibold">Create user</h2>
-        {error && <div className="mb-2 rounded bg-red-50 p-2 text-sm text-red-800">{error}</div>}
+        {error && <div className="mb-2 rounded-md bg-red-950/60 p-2 text-sm text-red-300">{error}</div>}
         <div className="grid grid-cols-2 gap-2">
-          <input className="rounded border p-2 text-sm" placeholder="Email" value={form.email}
+          <input className="rounded-md border p-2 text-sm" placeholder="Email" value={form.email}
                  onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          <input className="rounded border p-2 text-sm" placeholder="Full name" value={form.full_name}
+          <input className="rounded-md border p-2 text-sm" placeholder="Full name" value={form.full_name}
                  onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-          <input className="rounded border p-2 text-sm" type="password" placeholder="Password" value={form.password}
+          <input className="rounded-md border p-2 text-sm" type="password" placeholder="Password" value={form.password}
                  onChange={(e) => setForm({ ...form, password: e.target.value })} />
-          <select className="rounded border p-2 text-sm" value={form.role}
+          <select className="rounded-md border p-2 text-sm" value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value })}>
             <option value="investigator">investigator</option>
             <option value="supervisor">supervisor</option>
             <option value="admin">admin</option>
           </select>
         </div>
-        <button onClick={() => create.mutate()} className="mt-3 rounded bg-slate-800 px-4 py-2 text-sm text-white">
+        <button onClick={() => create.mutate()} className="mt-3 rounded bg-sky-600 px-4 py-2 text-sm text-white hover:bg-sky-500">
           Create
         </button>
       </div>
 
       {usersQ.isLoading ? <Spinner /> : (
-        <table className="w-full rounded bg-white shadow-sm">
+        <table className="w-full surface overflow-hidden">
           <thead>
-            <tr className="border-b text-left text-xs uppercase text-slate-500">
+            <tr className="border-b border-slate-800 text-left text-xs uppercase text-slate-500">
               <th className="p-3">Email</th><th className="p-3">Name</th><th className="p-3">Role</th>
             </tr>
           </thead>
           <tbody>
             {usersQ.data?.map((u) => (
-              <tr key={u.id} className="border-b last:border-0">
+              <tr key={u.id} className="border-b border-slate-800 last:border-0">
                 <td className="p-3 text-sm">{u.email}</td>
                 <td className="p-3 text-sm">{u.full_name}</td>
                 <td className="p-3 text-sm">{u.role}</td>

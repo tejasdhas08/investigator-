@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api, fmtMs } from "../../api/client";
 import CitedText from "../../components/CitedText";
+import HypothesisCheck from "../../components/HypothesisCheck";
 import { ErrorBox, ReviewBadge } from "../../components/shared";
 import type { DashboardContext } from "../CaseDashboard";
 
@@ -20,12 +21,16 @@ export default function NarrativeView({ ctx }: { ctx: DashboardContext }) {
 
   return (
     <div className="space-y-5">
-      <div className="rounded bg-white p-4 shadow-sm">
-        <p className="italic text-slate-700">{narrative.overall_summary}</p>
+      <div className="surface p-4">
+        <p className="italic text-slate-300">{narrative.overall_summary}</p>
       </div>
 
+      {narrative.hypothesis_check && (
+        <HypothesisCheck check={narrative.hypothesis_check} eventsById={eventsById} onSeek={onSeek} />
+      )}
+
       {narrative.narrative_sections.map((s) => (
-        <section key={s.section_index} className="rounded bg-white p-4 shadow-sm">
+        <section key={s.section_index} className="surface p-4">
           <h3 className="mb-1 font-semibold">
             {s.heading}{" "}
             <span className="text-xs font-normal text-slate-400">
@@ -46,7 +51,7 @@ export default function NarrativeView({ ctx }: { ctx: DashboardContext }) {
       )}
 
       {narrative.evidence_gaps.length > 0 && (
-        <section className="rounded bg-white p-4 shadow-sm">
+        <section className="surface p-4">
           <h3 className="mb-2 font-semibold">Evidence gaps</h3>
           <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
             {narrative.evidence_gaps.map((g, i) => <li key={i}>{g}</li>)}
@@ -55,7 +60,7 @@ export default function NarrativeView({ ctx }: { ctx: DashboardContext }) {
       )}
 
       {(narrative.human_edits?.length ?? 0) > 0 && (
-        <section className="rounded bg-white p-4 shadow-sm">
+        <section className="surface p-4">
           <h3 className="mb-2 font-semibold">Human edits (AI✎)</h3>
           {narrative.human_edits!.map((e, i) => (
             <p key={i} className="mb-1 text-sm">

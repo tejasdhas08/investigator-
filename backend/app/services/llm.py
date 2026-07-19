@@ -36,7 +36,8 @@ def _fake_complete(system: str, user_blocks: list[str]) -> str:
     joined = "\n".join(user_blocks)
     if "<output_schema>" in joined:  # narrative request
         timeline = _extract_block(joined, "timeline")
-        return json.dumps(_fake_narrative(timeline))
+        hypothesis = _extract_tag_text(joined, "case_context_hypothesis")
+        return json.dumps(_fake_narrative(timeline, hypothesis))
     if "<earlier_conversation_summary>" in joined or "Answer the investigator" in system:
         timeline = _extract_block(joined, "timeline")
         events = (timeline or {}).get("events", [])
@@ -66,12 +67,72 @@ def _extract_block(text: str, tag: str) -> dict | None:
         return None
 
 
+def _extract_tag_text(text: str, tag: str) -> str:
+    start, end = f"<{tag}>", f"</{tag}>"
+    if start not in text or end not in text:
+        return ""
+    return text.split(start, 1)[1].split(end, 1)[0].strip()
+
+
 def _mmss(ms: int) -> str:
     s = int(ms // 1000)
     return f"{s // 60:02d}:{s % 60:02d}"
 
 
-def _fake_narrative(timeline: dict | None) -> dict:
+def _fake_hypothesis_check(hypothesis: str, persons: list, events: list) -> dict:
+    """Deterministic hypothesis-vs-evidence pass (used when LLM_FAKE=1). Splits the
+    context into sentence-claims and judges each against the timeline by keyword —
+    a weak-but-honest stand-in for the real LLM's reasoning. Never asserts truth,
+    only how the evidence relates to the claim."""
+    import re
+
+    labels = [p["label"] for p in persons]
+    weapon_events = [e for e in events if e.get("object_class") in ("knife", "pistol", "rifle",
+                                                                    "scissors", "baseball bat")]
+    contact_events = [e for e in events if e.get("event_type") == "interaction"]
+    claims = []
+    for raw in re.split(r"(?<=[.!?])\s+", hypothesis.strip()):
+        raw = raw.strip()
+        if not raw:
+            continue
+        low = raw.lower()
+        cited: list[str] = []
+        if any(w in low for w in ("weapon", "knife", "gun", "pistol", "rifle", "armed")):
+            if weapon_events:
+                cited = [weapon_events[0]["event_id"]]
+                verdict, why = "partially_supported", (
+                    "The footage contains a possible object detection consistent with this, "
+                    "but at low confidence — human review required; not identification.")
+            else:
+                verdict, why = "unsupported", "No object consistent with a weapon was detected in the footage."
+        elif any(w in low for w in ("attack", "assault", "hit", "struck", "fought", "push")):
+            if contact_events:
+                cited = [contact_events[0]["event_id"]]
+                verdict, why = "partially_supported", (
+                    "The footage shows physical contact between persons, but does not establish "
+                    "who initiated it or intent — human review required.")
+            else:
+                verdict, why = "unsupported", "No physical interaction between persons was detected."
+        elif re.search(r"\b(two|three|four|\d+)\b.*(men|women|people|persons?)", low):
+            verdict, why = ("supported" if len(labels) >= 2 else "contradicted",
+                            f"The footage detected {len(labels)} distinct person(s): {', '.join(labels) or 'none'}.")
+        else:
+            verdict, why = "unsupported", (
+                "The footage contains no specific evidence for or against this claim.")
+        claims.append({"claim": raw, "verdict": verdict, "explanation": why,
+                       "cited_event_ids": cited})
+    supported = sum(1 for c in claims if c["verdict"] in ("supported", "partially_supported"))
+    return {
+        "hypothesis_text": hypothesis,
+        "claims": claims,
+        "overall": (f"{supported} of {len(claims)} claim(s) in the investigator's account have "
+                    "some supporting evidence in the footage; the rest are unsupported or "
+                    "contradicted. All findings require human verification.") if claims else
+                   "No hypothesis text was provided to check.",
+    }
+
+
+def _fake_narrative(timeline: dict | None, hypothesis: str = "") -> dict:
     timeline = timeline or {"persons": [], "events": [], "videos": []}
     persons = timeline.get("persons", [])
     events = [e for e in timeline.get("events", []) if e.get("confidence", 0) >= 0.40]
@@ -146,5 +207,6 @@ def _fake_narrative(timeline: dict | None) -> dict:
         "suspicious_activity_summary": suspicious,
         "uncertainties": uncertainties,
         "evidence_gaps": [n for v in timeline.get("videos", []) for n in v.get("quality_notes", [])],
+        "hypothesis_check": _fake_hypothesis_check(hypothesis, persons, events),
         "disclaimer": "",
     }

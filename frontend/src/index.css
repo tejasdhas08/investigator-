@@ -2,6 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---- CrimeScene AI design tokens (Phase 2) ----
+   One consistent system for confidence + review state, used everywhere:
+   - confidence >= 70%: neutral steel
+   - 40-69%: amber "requires human review" band
+   - < 40%: red, below evidentiary threshold (never presented as a claim)
+   - suspicious: red accents; approved: green; rejected: struck-through */
+:root {
+  --conf-high-bg: #334155;   /* slate-700 */
+  --conf-high-fg: #cbd5e1;   /* slate-300 */
+  --conf-mid-bg: #78350f;    /* amber-900 */
+  --conf-mid-fg: #fcd34d;    /* amber-300 */
+  --conf-low-bg: #7f1d1d;    /* red-900 */
+  --conf-low-fg: #fca5a5;    /* red-300 */
+  --accent: #38bdf8;         /* sky-400 */
+}
+
 body {
-  @apply bg-slate-100 text-slate-900;
+  @apply bg-slate-950 text-slate-200 antialiased;
+}
+
+/* Custom-styled form elements, one look everywhere (replaces browser defaults) */
+input, textarea {
+  @apply bg-slate-900 border border-slate-700 text-slate-200 rounded-md
+         placeholder:text-slate-500 focus:outline-none focus:ring-1
+         focus:ring-sky-500 focus:border-sky-500;
+}
+select {
+  @apply bg-slate-900 border border-slate-700 text-slate-200 rounded-md
+         focus:outline-none focus:ring-1 focus:ring-sky-500 appearance-none
+         bg-no-repeat pr-8;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+  background-position: right 0.6rem center;
+}
+input[type="checkbox"] {
+  @apply accent-sky-500;
+}
+input[type="file"] {
+  @apply border-0 bg-transparent text-slate-400 file:mr-3 file:rounded-md
+         file:border file:border-slate-600 file:bg-slate-800 file:px-3
+         file:py-1.5 file:text-sm file:text-slate-200 file:cursor-pointer;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0f172a; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* surface = card panel */
+.surface {
+  @apply bg-slate-900 border border-slate-800 rounded-lg shadow-lg shadow-black/20;
 }

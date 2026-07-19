@@ -6,9 +6,9 @@ import { Spinner } from "../../components/shared";
 import type { DashboardContext } from "../CaseDashboard";
 
 const VERDICT_STYLES: Record<string, string> = {
-  match: "bg-red-100 text-red-800",
-  possible_match: "bg-amber-100 text-amber-800",
-  no_match: "bg-slate-100 text-slate-600",
+  match: "bg-red-950 text-red-300 ring-1 ring-red-800",
+  possible_match: "bg-amber-950 text-amber-300 ring-1 ring-amber-800",
+  no_match: "bg-slate-800 text-slate-400",
 };
 
 export default function SuspectView({ ctx }: { ctx: DashboardContext }) {
@@ -62,21 +62,21 @@ export default function SuspectView({ ctx }: { ctx: DashboardContext }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded bg-white p-4 shadow-sm">
+      <div className="surface p-4">
         <h3 className="mb-2 font-semibold">Upload suspect reference photo</h3>
-        {error && <div className="mb-2 rounded bg-red-50 p-2 text-sm text-red-800">{error}</div>}
-        <input className="mb-2 w-full rounded border p-2 text-sm" placeholder="Reference label"
+        {error && <div className="mb-2 rounded-md bg-red-950/60 p-2 text-sm text-red-300">{error}</div>}
+        <input className="mb-2 w-full rounded-md border p-2 text-sm" placeholder="Reference label"
                value={name} onChange={(e) => setName(e.target.value)} />
         <input type="file" accept="image/*" className="mb-2 block text-sm"
                onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
         <button onClick={() => upload.mutate()} disabled={upload.isPending || !file}
-                className="rounded bg-slate-800 px-4 py-2 text-sm text-white disabled:opacity-50">
+                className="rounded bg-sky-600 px-4 py-2 text-sm text-white hover:bg-sky-500 disabled:opacity-50">
           {upload.isPending ? "Uploading…" : "Upload & match"}
         </button>
       </div>
 
       {refsQ.isLoading ? <Spinner /> : refsQ.data?.map((ref) => (
-        <div key={ref.id} className="rounded bg-white p-4 shadow-sm">
+        <div key={ref.id} className="surface p-4">
           <div className="mb-3 flex items-center gap-3">
             {ref.photo_url && <img src={ref.photo_url} alt="reference" className="h-16 w-16 rounded object-cover" />}
             <div>
@@ -91,13 +91,13 @@ export default function SuspectView({ ctx }: { ctx: DashboardContext }) {
           )}
           <div className="space-y-2">
             {ref.results.map((r) => (
-              <div key={r.id} className="flex items-center gap-3 rounded border p-2">
+              <div key={r.id} className="flex items-center gap-3 rounded-md border p-2">
                 {ref.photo_url && <img src={ref.photo_url} alt="ref" className="h-12 w-12 rounded object-cover" />}
                 <span className="text-slate-400">vs</span>
                 {r.comparison_face_url ? (
                   <img src={r.comparison_face_url} alt={`Person ${r.person_label}`} className="h-12 w-12 rounded object-cover" />
                 ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded bg-slate-200 text-[9px] text-slate-500">
+                  <div className="flex h-12 w-12 items-center justify-center rounded bg-slate-700 text-[9px] text-slate-500">
                     no usable face
                   </div>
                 )}
@@ -108,7 +108,7 @@ export default function SuspectView({ ctx }: { ctx: DashboardContext }) {
                       ? "no usable face — cannot compare"
                       : `similarity ${r.cosine_similarity.toFixed(2)}`}
                     {r.best_frame_ms != null && (
-                      <button className="ml-2 text-blue-700 underline" onClick={() => ctx.onSeek(r.best_frame_ms!)}>
+                      <button className="ml-2 text-sky-400 underline" onClick={() => ctx.onSeek(r.best_frame_ms!)}>
                         {fmtMs(r.best_frame_ms)}
                       </button>
                     )}
@@ -120,7 +120,7 @@ export default function SuspectView({ ctx }: { ctx: DashboardContext }) {
                 {r.verdict !== "no_match" && r.review_status === "unreviewed" && (
                   <div className="flex gap-1">
                     <button onClick={() => reviewMatch.mutate({ refId: ref.id, resultId: r.id, action: "confirm" })}
-                            className="rounded bg-green-700 px-2 py-1 text-xs text-white">Confirm</button>
+                            className="rounded bg-emerald-700 hover:bg-emerald-600 px-2 py-1 text-xs text-white">Confirm</button>
                     <button onClick={() => reviewMatch.mutate({ refId: ref.id, resultId: r.id, action: "reject" })}
                             className="rounded bg-red-700 px-2 py-1 text-xs text-white">Reject</button>
                   </div>

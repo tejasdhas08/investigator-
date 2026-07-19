@@ -34,14 +34,14 @@ export default function ReviewView({ ctx }: { ctx: DashboardContext }) {
     <div className="space-y-5">
       <div className="grid grid-cols-4 gap-3">
         {Object.entries(tallies).map(([k, v]) => (
-          <div key={k} className="rounded bg-white p-3 text-center shadow-sm">
+          <div key={k} className="surface p-3 text-center">
             <div className="text-2xl font-bold">{v}</div>
             <div className="text-xs uppercase text-slate-500">{k}</div>
           </div>
         ))}
       </div>
 
-      <div className="rounded bg-white p-4 shadow-sm">
+      <div className="surface p-4">
         <h3 className="mb-2 font-semibold">Items requiring human review ({needsReview.length})</h3>
         {needsReview.length === 0 && <p className="text-sm text-slate-500">Nothing pending review.</p>}
         <ul className="divide-y">
@@ -53,13 +53,13 @@ export default function ReviewView({ ctx }: { ctx: DashboardContext }) {
                 {e.person_label && ` — Person ${e.person_label}`}
               </span>
               <ReviewBadge />
-              <button onClick={() => setSelected(e.id)} className="text-blue-700 underline">Review</button>
+              <button onClick={() => setSelected(e.id)} className="text-sky-400 underline">Review</button>
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="rounded bg-white p-4 shadow-sm">
+      <div className="surface p-4">
         <h3 className="mb-2 font-semibold">Export report (PDF)</h3>
         <p className="mb-2 text-xs text-slate-500">
           Exports are immutable snapshots. Unconfirmed AI content is marked; every page carries the disclaimer.
@@ -69,7 +69,7 @@ export default function ReviewView({ ctx }: { ctx: DashboardContext }) {
           Include Q&A transcript
         </label>
         <button onClick={() => createExport.mutate()} disabled={createExport.isPending}
-                className="rounded bg-slate-800 px-4 py-2 text-sm text-white disabled:opacity-50">
+                className="rounded bg-sky-600 px-4 py-2 text-sm text-white hover:bg-sky-500 disabled:opacity-50">
           Generate PDF
         </button>
         <ul className="mt-4 divide-y">
@@ -81,7 +81,7 @@ export default function ReviewView({ ctx }: { ctx: DashboardContext }) {
               </span>
               {e.status === "complete" && (
                 <a href={`/api/v1/cases/${caseId}/exports/${e.id}/download`} target="_blank" rel="noreferrer"
-                   className="text-blue-700 underline">Download</a>
+                   className="text-sky-400 underline">Download</a>
               )}
             </li>
           ))}

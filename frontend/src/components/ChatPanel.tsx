@@ -46,10 +46,10 @@ export default function ChatPanel({ caseId, caseStatus, eventsById, onSeek }: {
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] flex-col rounded border bg-white shadow-sm">
+    <div className="flex h-[calc(100vh-8rem)] flex-col rounded border bg-slate-900 shadow-sm">
       <div className="border-b px-3 py-2">
         <div className="text-sm font-semibold">Case Q&A</div>
-        <div className="text-[11px] text-red-800">AI-assisted analysis — verify against footage. Not evidence.</div>
+        <div className="text-[11px] text-red-300">AI-assisted analysis — verify against footage. Not evidence.</div>
       </div>
       <div className="flex-1 space-y-3 overflow-y-auto p-3">
         {messages.length === 0 && !ask.isPending && (
@@ -58,7 +58,7 @@ export default function ChatPanel({ caseId, caseStatus, eventsById, onSeek }: {
             <ul className="space-y-1">
               {EXAMPLES.map((ex) => (
                 <li key={ex}>
-                  <button className="text-left text-blue-700 underline" onClick={() => setInput(ex)}>{ex}</button>
+                  <button className="text-left text-sky-400 underline" onClick={() => setInput(ex)}>{ex}</button>
                 </li>
               ))}
             </ul>
@@ -66,13 +66,13 @@ export default function ChatPanel({ caseId, caseStatus, eventsById, onSeek }: {
         )}
         {messages.map((m) => (
           <div key={m.id}
-               className={`rounded-lg p-2.5 text-sm ${m.role === "user" ? "ml-6 bg-slate-100" : "mr-2 border bg-white"}`}>
+               className={`rounded-lg p-2.5 text-sm ${m.role === "user" ? "ml-6 bg-slate-800" : "mr-2 border bg-slate-900"}`}>
             <CitedText text={m.content} eventsById={eventsById} onSeek={onSeek} />
           </div>
         ))}
         {ask.isPending && <div className="text-sm text-slate-400">Answering…</div>}
         {ask.isError && (
-          <div className="rounded bg-red-50 p-2 text-xs text-red-800">
+          <div className="rounded bg-red-50 p-2 text-xs text-red-300">
             {(ask.error as Error).message || "Q&A temporarily unavailable — try again shortly."}
           </div>
         )}
@@ -82,9 +82,9 @@ export default function ChatPanel({ caseId, caseStatus, eventsById, onSeek }: {
         <input value={input} onChange={(e) => setInput(e.target.value)}
                disabled={caseStatus !== "complete"}
                placeholder={caseStatus === "complete" ? "Ask about this case…" : "Available once analysis completes"}
-               className="flex-1 rounded border p-2 text-sm" />
+               className="flex-1 rounded-md border p-2 text-sm" />
         <button disabled={ask.isPending || caseStatus !== "complete"}
-                className="rounded bg-slate-800 px-3 text-sm text-white disabled:opacity-50">Send</button>
+                className="rounded bg-sky-600 px-3 text-sm text-white hover:bg-sky-500 disabled:opacity-50">Send</button>
       </form>
     </div>
   );

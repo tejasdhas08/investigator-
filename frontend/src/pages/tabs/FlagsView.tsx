@@ -23,7 +23,7 @@ export default function FlagsView({ ctx }: { ctx: DashboardContext }) {
     <div className="space-y-3">
       {flags.map((e) => (
         <div key={e.id}
-             className={`rounded border-l-4 bg-white p-4 shadow-sm ${SEVERITY_ORDER.indexOf(e.label) <= 1 && SEVERITY_ORDER.includes(e.label) ? "border-red-600" : "border-amber-500"} ${e.review_status === "rejected" ? "opacity-40" : ""}`}>
+             className={`rounded border-l-4 bg-slate-900 p-4 shadow-sm ${SEVERITY_ORDER.indexOf(e.label) <= 1 && SEVERITY_ORDER.includes(e.label) ? "border-red-600" : "border-amber-500"} ${e.review_status === "rejected" ? "opacity-40" : ""}`}>
           <div className="mb-1 flex items-center gap-2">
             <span className="font-semibold">{e.label.replace(/_/g, " ")}</span>
             <ConfidenceChip confidence={e.confidence} startMs={e.start_ms} onSeek={ctx.onSeek} />
@@ -41,7 +41,7 @@ export default function FlagsView({ ctx }: { ctx: DashboardContext }) {
               <img key={i} src={u} alt="evidence" className="h-16 rounded border" />
             ))}
             <span className="text-xs text-slate-500">{fmtMs(e.start_ms)}–{fmtMs(e.end_ms)}</span>
-            <button onClick={() => setSelected(e.id)} className="text-xs text-blue-700 underline">Review</button>
+            <button onClick={() => setSelected(e.id)} className="text-xs text-sky-400 underline">Review</button>
           </div>
         </div>
       ))}

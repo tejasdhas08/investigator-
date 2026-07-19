@@ -56,11 +56,11 @@ export default function TimelineView({ ctx }: { ctx: DashboardContext }) {
         </label>
       </div>
 
-      <div className="space-y-2 overflow-x-auto rounded bg-white p-4 shadow-sm">
+      <div className="space-y-2 overflow-x-auto surface p-4">
         {lanes.map((lane) => (
           <div key={lane.name} className="flex items-center gap-2">
-            <div className="w-28 shrink-0 text-xs font-medium text-slate-600">{lane.name}</div>
-            <div className="relative h-7 flex-1 rounded bg-slate-100">
+            <div className="w-28 shrink-0 text-xs font-medium text-slate-400">{lane.name}</div>
+            <div className="relative h-7 flex-1 rounded bg-slate-800">
               {lane.events.map((e) => (
                 <button
                   key={e.id}

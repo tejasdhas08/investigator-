@@ -76,6 +76,56 @@ def timeline(
     return Page(items=[_event_out(e, label_by_id) for e in rows], total=total, page=page, page_size=page_size)
 
 
+@router.get("/events/{event_id}/explain")
+def explain_event(
+    event_id: uuid.UUID,
+    case: Case = Depends(get_case_for_user),
+    db: Session = Depends(get_db),
+):
+    """Explainability drill-down (Phase 3): the signals behind an event's confidence
+    score. Everything returned is derived from stored detection data — no new claims."""
+    e = db.get(TimelineEvent, event_id)
+    if e is None or e.case_id != case.id:
+        raise HTTPException(404, detail={"error": "not_found", "message": "Event not found"})
+    persons = {p.id: p for p in db.execute(select(Person).where(Person.case_id == case.id)).scalars()}
+    signals = []
+    signals.append({"label": "Detection model confidence", "value": round(e.confidence, 3),
+                    "detail": f"Backend score for the '{e.label}' {e.event_type.replace('_', ' ')}."})
+    band = ("high (>=0.70): shown as a standard claim" if e.confidence >= 0.70 else
+            "review band (0.40-0.69): flagged for human review" if e.confidence >= 0.40 else
+            "below threshold (<0.40): not used as a claim")
+    signals.append({"label": "Confidence band", "value": band, "detail": None})
+    if e.person_id and e.person_id in persons:
+        p = persons[e.person_id]
+        signals.append({"label": "Subject track confidence",
+                        "value": round(p.detection_confidence_avg, 3),
+                        "detail": f"Mean detection confidence for Person {p.label} across the video."})
+        signals.append({"label": "Face visible for subject", "value": p.face_visible,
+                        "detail": "Face-based identity signals are only available when a face was seen."})
+    if e.event_type == "interaction":
+        signals.append({
+            "label": "Actor direction resolved", "value": bool(e.actor_direction),
+            "detail": ("Approach-speed difference exceeded threshold, so an actor was inferred."
+                       if e.actor_direction else
+                       "Approach speeds were too similar — who initiated cannot be established."),
+        })
+        signals.append({"label": "Confidence cap", "value": 0.75,
+                        "detail": "Interaction confidence is capped: the pipeline never claims "
+                                  "near-certainty about intent from pixels."})
+    if e.object_class:
+        signals.append({"label": "Object class", "value": e.object_class,
+                        "detail": "COCO/weapon detector class label for the detected object."})
+    signals.append({"label": "Evidence frames", "value": len(e.evidence_frame_s3_keys or []),
+                    "detail": "Number of representative frames stored as visual evidence."})
+    return {
+        "event_id": str(e.id),
+        "confidence": e.confidence,
+        "requires_human_review": e.requires_human_review,
+        "review_status": e.review_status,
+        "signals": signals,
+    }
+
+
 @router.get("/narrative")
 def get_narrative(case: Case = Depends(get_case_for_user)):
     if not case.narrative_json:

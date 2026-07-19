@@ -1,7 +1,7 @@
 import { fmtMs } from "../api/client";
 
-/** Section 7.1: every claim carries its confidence chip; 0.40-0.69 amber + review tooltip;
- * <0.40 only shown with the below-threshold watermark. */
+/** Section 7.1 + Phase 2 design system: every claim carries its confidence chip.
+ * >=70% steel; 40-69% amber + review tooltip; <40% red, below-threshold watermark. */
 export function ConfidenceChip({ confidence, startMs, onSeek }: {
   confidence: number;
   startMs?: number;
@@ -10,10 +10,10 @@ export function ConfidenceChip({ confidence, startMs, onSeek }: {
   const pct = Math.round(confidence * 100);
   const cls =
     confidence >= 0.7
-      ? "bg-slate-200 text-slate-700"
+      ? "bg-slate-700 text-slate-300"
       : confidence >= 0.4
-        ? "bg-amber-200 text-amber-900"
-        : "bg-red-100 text-red-800 line-through";
+        ? "bg-amber-900/70 text-amber-300 ring-1 ring-amber-700"
+        : "bg-red-950 text-red-400 line-through";
   const title =
     confidence >= 0.7
       ? `Confidence ${pct}%`
@@ -25,7 +25,7 @@ export function ConfidenceChip({ confidence, startMs, onSeek }: {
       type="button"
       title={title}
       onClick={() => startMs !== undefined && onSeek?.(startMs)}
-      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${cls} ${onSeek ? "cursor-pointer hover:ring-1 ring-slate-400" : "cursor-default"}`}
+      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-xs font-medium ${cls} ${onSeek ? "cursor-pointer hover:ring-1 hover:ring-sky-500" : "cursor-default"}`}
     >
       {startMs !== undefined && <span>{fmtMs(startMs)}</span>}
       <span>· {pct}%</span>
@@ -35,16 +35,18 @@ export function ConfidenceChip({ confidence, startMs, onSeek }: {
 
 export function ReviewBadge() {
   return (
-    <span className="ml-1 rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+    <span className="ml-1 rounded bg-amber-500/90 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-950">
       Requires human review
     </span>
   );
 }
 
-/** Condensed disclaimer banner pinned atop every case tab (Section 7.5). */
+/** Condensed disclaimer banner pinned atop every case tab (Section 7.5) —
+ * restyled for the dark theme, wording unchanged and non-negotiable. */
 export function DisclaimerBanner() {
   return (
-    <div className="mb-3 rounded border border-red-300 bg-red-50 px-3 py-1.5 text-xs text-red-900">
+    <div className="mb-3 flex items-center gap-2 rounded-md border border-red-900 bg-red-950/60 px-3 py-1.5 text-xs text-red-300">
+      <span aria-hidden>⚠</span>
       AI-assisted analysis — verify against footage before use. Not evidence.
     </div>
   );
@@ -52,12 +54,12 @@ export function DisclaimerBanner() {
 
 export function StatusPill({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    complete: "bg-green-100 text-green-800",
-    failed: "bg-red-100 text-red-800",
-    archived: "bg-slate-200 text-slate-600",
-    created: "bg-slate-100 text-slate-700",
+    complete: "bg-emerald-950 text-emerald-400 ring-1 ring-emerald-800",
+    failed: "bg-red-950 text-red-400 ring-1 ring-red-800",
+    archived: "bg-slate-800 text-slate-500",
+    created: "bg-slate-800 text-slate-300",
   };
-  const cls = colors[status] ?? "bg-blue-100 text-blue-800 animate-pulse";
+  const cls = colors[status] ?? "bg-sky-950 text-sky-300 ring-1 ring-sky-800 animate-pulse";
   return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>{status}</span>;
 }
 
@@ -66,5 +68,5 @@ export function Spinner() {
 }
 
 export function ErrorBox({ message }: { message: string }) {
-  return <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">{message}</div>;
+  return <div className="rounded-md border border-red-900 bg-red-950/60 p-3 text-sm text-red-300">{message}</div>;
 }

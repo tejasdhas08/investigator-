@@ -24,7 +24,7 @@ export default function ObjectsView({ ctx }: { ctx: DashboardContext }) {
   return (
     <div className="space-y-4">
       {sorted.map(([cls, items]) => (
-        <div key={cls} className="rounded bg-white p-4 shadow-sm">
+        <div key={cls} className="surface p-4">
           {WEAPONS.has(cls) && (
             <div className="mb-2 rounded bg-red-600 px-2 py-1 text-xs font-bold uppercase text-white">
               Possible weapon
@@ -33,7 +33,7 @@ export default function ObjectsView({ ctx }: { ctx: DashboardContext }) {
           <h3 className="mb-2 font-semibold capitalize">{cls} <span className="text-sm font-normal text-slate-500">({items.length})</span></h3>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {items.map((e) => (
-              <button key={e.id} onClick={() => setSelected(e.id)} className="rounded border p-2 text-left hover:bg-slate-50">
+              <button key={e.id} onClick={() => setSelected(e.id)} className="rounded-md border p-2 text-left hover:bg-slate-800/60">
                 {e.evidence_frame_urls[0] && (
                   <img src={e.evidence_frame_urls[0]} alt={cls} className="mb-1 h-20 w-full rounded object-cover" />
                 )}

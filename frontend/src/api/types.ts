@@ -95,6 +95,19 @@ export interface NarrativeSection {
   cited_event_ids: string[];
 }
 
+export interface HypothesisClaim {
+  claim: string;
+  verdict: "supported" | "contradicted" | "unsupported" | "partially_supported";
+  explanation: string;
+  cited_event_ids: string[];
+}
+
+export interface HypothesisCheck {
+  hypothesis_text: string;
+  claims: HypothesisClaim[];
+  overall: string;
+}
+
 export interface NarrativeDoc {
   overall_summary: string;
   narrative_sections: NarrativeSection[];
@@ -107,8 +120,23 @@ export interface NarrativeDoc {
   }[];
   uncertainties: { text: string; related_event_ids: string[] }[];
   evidence_gaps: string[];
+  hypothesis_check?: HypothesisCheck | null;
   disclaimer: string;
   human_edits?: { path: string; original_text: string; edited_text: string }[];
+}
+
+export interface ExplainSignal {
+  label: string;
+  value: string | number | boolean;
+  detail: string | null;
+}
+
+export interface EventExplanation {
+  event_id: string;
+  confidence: number;
+  requires_human_review: boolean;
+  review_status: string;
+  signals: ExplainSignal[];
 }
 
 export interface SuspectMatchResult {

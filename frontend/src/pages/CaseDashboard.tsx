@@ -4,6 +4,7 @@ import { Link, NavLink, Route, Routes, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import type { Case, Page, Person, TimelineEvent, Video } from "../api/types";
 import ChatPanel from "../components/ChatPanel";
+import VideoPlayer, { type VideoPlayerHandle } from "../components/VideoPlayer";
 import { DisclaimerBanner, Spinner, StatusPill } from "../components/shared";
 import FlagsView from "./tabs/FlagsView";
 import NarrativeView from "./tabs/NarrativeView";
@@ -34,7 +35,7 @@ const TABS = [
 
 export default function CaseDashboard() {
   const { caseId } = useParams();
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerRef = useRef<VideoPlayerHandle>(null);
   const [chatOpen, setChatOpen] = useState(true);
 
   const caseQ = useQuery({ queryKey: ["case", caseId], queryFn: () => api<Case>(`/cases/${caseId}`) });
@@ -46,11 +47,7 @@ export default function CaseDashboard() {
   });
 
   const onSeek = useCallback((ms: number) => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = ms / 1000;
-      videoRef.current.play().catch(() => {});
-      videoRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
+    playerRef.current?.seekMs(ms);
   }, []);
 
   const events = eventsQ.data?.items ?? [];
@@ -100,18 +97,17 @@ export default function CaseDashboard() {
         <div className="min-w-0 flex-1">
           {video?.stream_url && (
             video.media_type === "video" ? (
-              <video ref={videoRef} src={video.stream_url} controls
-                     className="mb-4 max-h-96 w-full rounded bg-black" />
+              <VideoPlayer ref={playerRef} src={video.stream_url} events={events} />
             ) : (
               <img src={video.stream_url} alt="uploaded evidence"
                    className="mb-4 max-h-96 rounded" />
             )
           )}
-          <nav className="mb-4 flex flex-wrap gap-1 border-b">
+          <nav className="mb-4 flex flex-wrap gap-1 border-b border-slate-800">
             {TABS.map((t) => (
               <NavLink key={t.path} to={t.path} end={t.path === ""}
                        className={({ isActive }) =>
-                         `px-3 py-2 text-sm font-medium ${isActive ? "border-b-2 border-slate-800 text-slate-900" : "text-slate-500 hover:text-slate-800"}`}>
+                         `px-3 py-2 text-sm font-medium ${isActive ? "border-b-2 border-slate-800 text-slate-100" : "text-slate-500 hover:text-slate-200"}`}>
                 {t.label}
               </NavLink>
             ))}

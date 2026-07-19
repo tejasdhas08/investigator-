@@ -30,6 +30,22 @@ class Uncertainty(BaseModel):
     related_event_ids: list[str] = []
 
 
+class HypothesisClaim(BaseModel):
+    """One checkable assertion extracted from the investigator's context, judged against
+    the timeline (Phase 3 flagship feature). verdict is never 'confirmed as fact' —
+    only how the *evidence* relates to the claim."""
+    claim: str
+    verdict: Literal["supported", "contradicted", "unsupported", "partially_supported"]
+    explanation: str
+    cited_event_ids: list[str] = []
+
+
+class HypothesisCheck(BaseModel):
+    hypothesis_text: str
+    claims: list[HypothesisClaim] = []
+    overall: str = ""
+
+
 class HumanEdit(BaseModel):
     path: str
     original_text: str
@@ -48,6 +64,7 @@ class NarrativeDoc(BaseModel):
     suspicious_activity_summary: list[SuspiciousSummary] = []
     uncertainties: list[Uncertainty] = []
     evidence_gaps: list[str] = []
+    hypothesis_check: HypothesisCheck | None = None
     disclaimer: str = ""
     human_edits: list[HumanEdit] = []
 

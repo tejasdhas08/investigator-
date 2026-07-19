@@ -21,7 +21,7 @@ export default function PeopleView({ ctx }: { ctx: DashboardContext }) {
 
   return (
     <div>
-      <div className="mb-4 rounded bg-white p-4 shadow-sm">
+      <div className="mb-4 surface p-4">
         <span className="text-lg font-bold">{caseData.person_count_total ?? persons.length} people detected</span>
         <span className="ml-3 text-sm text-slate-600">
           {caseData.person_count_male ?? 0} male est. · {caseData.person_count_female ?? 0} female est. ·{" "}
@@ -33,7 +33,7 @@ export default function PeopleView({ ctx }: { ctx: DashboardContext }) {
       </div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         {persons.map((p) => (
-          <div key={p.id} className="rounded bg-white p-4 shadow-sm">
+          <div key={p.id} className="surface p-4">
             <div className="mb-2 flex items-start gap-3">
               {p.face_crop_url ? (
                 <img src={p.face_crop_url} alt={`Person ${p.label} face`}
@@ -60,7 +60,7 @@ export default function PeopleView({ ctx }: { ctx: DashboardContext }) {
                   {p.gender_estimate}
                   {p.gender_confidence != null && <> <ConfidenceChip confidence={p.gender_confidence} /></>}
                   {p.gender_human_override && (
-                    <span className="ml-1 text-xs text-blue-700">(human override: {p.gender_human_override})</span>
+                    <span className="ml-1 text-xs text-sky-400">(human override: {p.gender_human_override})</span>
                   )}
                 </dd>
               </div>
@@ -71,7 +71,7 @@ export default function PeopleView({ ctx }: { ctx: DashboardContext }) {
               <div>
                 <dt className="inline text-slate-500">Present: </dt>
                 <dd className="inline">
-                  <button className="text-blue-700 underline" onClick={() => onSeek(p.first_seen_ms ?? 0)}>
+                  <button className="text-sky-400 underline" onClick={() => onSeek(p.first_seen_ms ?? 0)}>
                     {fmtMs(p.first_seen_ms)}
                   </button>{" "}
                   – {fmtMs(p.last_seen_ms)}
@@ -83,7 +83,7 @@ export default function PeopleView({ ctx }: { ctx: DashboardContext }) {
               <p className="mt-2 border-t pt-2 text-xs text-slate-700">{p.activity_summary}</p>
             )}
             <div className="mt-2 flex items-center gap-2 text-xs">
-              <Link to={`../timeline?person=${p.label}`} className="text-blue-700 underline">Timeline</Link>
+              <Link to={`../timeline?person=${p.label}`} className="text-sky-400 underline">Timeline</Link>
               {editing === p.id ? (
                 <>
                   <input className="w-28 rounded border p-1" value={alias}

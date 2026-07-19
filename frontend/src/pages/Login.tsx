@@ -34,7 +34,7 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <form onSubmit={submit} className="w-96 rounded-lg bg-white p-8 shadow">
+      <form onSubmit={submit} className="w-96 surface p-8">
         <h1 className="mb-1 text-xl font-bold">CrimeScene AI</h1>
         <p className="mb-6 text-xs text-slate-500">
           Investigation co-pilot — authorized personnel only. All activity is audit-logged.
