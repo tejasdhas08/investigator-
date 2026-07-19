@@ -1,0 +1,18 @@
+# GPU override: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
+# Replaces the stage-2 worker with the CUDA CV build. Requires nvidia-container-toolkit.
+services:
+  worker-stage2:
+    build:
+      context: ../backend
+      target: worker-gpu
+    volumes:
+      - ../models:/srv/models
+    environment:
+      PIPELINE_FAKE: "0"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
