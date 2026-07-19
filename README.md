@@ -36,6 +36,22 @@ docker compose up --build
 - API docs: http://localhost:8000/api/docs
 - MinIO console: http://localhost:9001
 
+### No Docker? (Windows without Docker Desktop, or any machine with just Python/Node)
+
+Use WSL (Windows Subsystem for Linux, built into Windows 10/11 — `wsl --install` from an
+admin cmd prompt, no separate download needed) or any Linux/macOS shell, then:
+
+```bash
+sudo apt update && sudo apt install -y python3 python3-venv python3-pip nodejs npm ffmpeg redis-server
+cd deploy
+./run_local.sh
+```
+
+This runs the same full demo without Postgres/MinIO/Docker — SQLite instead of Postgres,
+a pure-Python fake S3 server (`moto`) instead of MinIO, real Redis/Celery/ffmpeg. Open
+http://localhost:3000 once it prints "CrimeScene AI is running." Ctrl+C stops everything;
+state lives in `deploy/.run_local/` (gitignored) and is wiped by deleting that folder.
+
 Create a case, upload any short mp4 or a photo, start analysis. In fake mode Stage 2
 loads the hand-authored fixture timeline (`backend/tests/fixtures/timeline_fixture.json`)
 and the LLM responder is deterministic, so the whole product — People, Timeline, Flags,

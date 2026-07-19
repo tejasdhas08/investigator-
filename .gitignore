@@ -13,3 +13,4 @@ models/*.pt
 models/*.onnx
 backend/scratch/
 .coverage
+.run_local/
