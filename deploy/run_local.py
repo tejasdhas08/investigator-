@@ -48,7 +48,7 @@ def bootstrap_venv_and_reexec() -> None:
 
 def install_dependencies() -> None:
     marker = RUNDIR / "deps_installed.marker"
-    req_hash = str((BACKEND / "requirements.txt").stat().st_mtime)
+    req_hash = "v2-" + str((BACKEND / "requirements.txt").stat().st_mtime)
     if marker.exists() and marker.read_text() == req_hash:
         return
     print("[2/5] Installing Python dependencies (first run only, ~1-2 min)...")
@@ -59,6 +59,44 @@ def install_dependencies() -> None:
         check=True,
     )
     marker.write_text(req_hash)
+
+
+def install_real_detection() -> bool:
+    """Install the CPU real-detection ('lite') stack + its object model.
+
+    Returns True when real detection is ready. On failure the app still runs, but
+    in FIXTURE mode — same canned demo output for every video — with a loud warning,
+    so a broken install is never mistaken for real analysis."""
+    marker = RUNDIR / "lite_ready.marker"
+    model = ROOT / "models" / "efficientdet_lite0.tflite"
+    if marker.exists() and model.exists():
+        return True
+    print("[2b/5] Installing REAL detection stack (dlib face models ~100MB, first run only)...")
+    try:
+        subprocess.run(
+            [str(VENV_PY), "-m", "pip", "install", "--quiet",
+             "mediapipe", "opencv-python-headless", "dlib-bin",
+             "face-recognition", "face-recognition-models", "norfair"],
+            check=True,
+        )
+        (ROOT / "models").mkdir(exist_ok=True)
+        if not model.exists():
+            subprocess.run(
+                [str(VENV_PY), "-m", "scripts.fetch_models", "--lite-only"],
+                check=True, cwd=str(BACKEND),
+            )
+        if not model.exists():
+            raise RuntimeError("object model download failed")
+        marker.write_text("ok")
+        return True
+    except Exception as exc:
+        print(f"""
+!! REAL DETECTION UNAVAILABLE ({exc})
+!! Falling back to FIXTURE mode: every video will show the same canned demo
+!! output. Fix the install (internet access to pypi.org and
+!! storage.googleapis.com is required once) and re-run to enable real analysis.
+""")
+        return False
 
 
 def ensure_ffmpeg() -> None:
@@ -94,8 +132,10 @@ def configure_environment() -> None:
     os.environ.setdefault("PROGRESS_BACKEND", "file")
     os.environ.setdefault("PROGRESS_DIR", str((RUNDIR / "progress").resolve()))
     os.environ.setdefault("CELERY_EAGER", "1")
-    os.environ.setdefault("PIPELINE_FAKE", "1")
-    os.environ.setdefault("LLM_FAKE", "1")
+    # PIPELINE_FAKE is decided by main() based on whether real detection installed.
+    # LLM: real narrative synthesis needs ANTHROPIC_API_KEY; without one the
+    # deterministic template responder builds the narrative from the real timeline.
+    os.environ.setdefault("LLM_FAKE", "0" if os.environ.get("ANTHROPIC_API_KEY") else "1")
     os.environ.setdefault("JWT_SECRET", "local-dev-secret-change-me")
     os.environ.setdefault(
         "APP_ENCRYPTION_KEY",
@@ -146,6 +186,12 @@ def open_browser_when_ready(url: str) -> None:
 def main() -> None:
     bootstrap_venv_and_reexec()
     install_dependencies()
+    real_ready = install_real_detection()
+    os.environ.setdefault("PIPELINE_FAKE", "0" if real_ready else "1")
+    os.environ.setdefault("PIPELINE_MODE", "auto")
+    if real_ready:
+        print("Real detection enabled (CPU). Analysis takes roughly 1-2x the video's "
+              "duration per video — the status screen shows live progress.")
     ensure_ffmpeg()
     configure_environment()
 

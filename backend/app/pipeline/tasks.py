@@ -58,13 +58,40 @@ def stage1_task(self, case_id: str):
     return case_id
 
 
+def resolve_stage2_backend():
+    """Pick the detection backend (Phase 1 dispatch).
+
+    PIPELINE_FAKE=1 forces the fixture detector (demo/CI only). Otherwise
+    PIPELINE_MODE selects: 'full' (YOLOv8+InsightFace, GPU-oriented), 'lite'
+    (dlib+MediaPipe, CPU/offline-capable), or 'auto' — full if available, else
+    lite, else a hard failure that names exactly what's missing. Never silently
+    falls back to fixture data."""
+    if settings.pipeline_fake:
+        from app.pipeline import stage2_fake
+
+        return stage2_fake, "fake"
+    mode = settings.pipeline_mode
+    from app.pipeline import stage2, stage2_lite
+
+    full_ok, full_why = stage2.available()
+    lite_ok, lite_why = stage2_lite.available()
+    if mode == "full" or (mode == "auto" and full_ok):
+        if not full_ok:
+            raise RuntimeError(f"full detection backend unavailable: {full_why}")
+        return stage2, "full"
+    if mode == "lite" or (mode == "auto" and lite_ok):
+        if not lite_ok:
+            raise RuntimeError(f"lite detection backend unavailable: {lite_why}")
+        return stage2_lite, "lite"
+    raise RuntimeError(
+        f"no detection backend available — full: {full_why}; lite: {lite_why}"
+    )
+
+
 @celery.task(name="app.pipeline.stage2.detect", bind=True, max_retries=1)
 def stage2_task(self, case_id: str):
     try:
-        if settings.pipeline_fake:
-            from app.pipeline import stage2_fake as stage2_impl
-        else:
-            from app.pipeline import stage2 as stage2_impl
+        stage2_impl, backend = resolve_stage2_backend()
         stage2_impl.run(case_id)
     except Exception as exc:
         traceback.print_exc()
@@ -93,10 +120,7 @@ def stage3_task(self, case_id: str):
 
 @celery.task(name="app.pipeline.stage2.suspect_match", bind=True, max_retries=1)
 def suspect_match_task(self, case_id: str, ref_id: str):
-    if settings.pipeline_fake:
-        from app.pipeline import stage2_fake as impl
-    else:
-        from app.pipeline import stage2 as impl
+    impl, _backend = resolve_stage2_backend()
     impl.match_suspect(case_id, ref_id)
 
 

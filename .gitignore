@@ -11,6 +11,7 @@ frontend/dist/
 *.egg-info/
 models/*.pt
 models/*.onnx
+models/*.tflite
 backend/scratch/
 .coverage
 .run_local/

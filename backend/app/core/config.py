@@ -29,7 +29,8 @@ class Settings(BaseSettings):
     qa_model: str = "claude-fable-5"
     summary_model: str = "claude-haiku-4-5-20251001"
 
-    pipeline_fake: bool = False  # Phase 3 fake detector (env PIPELINE_FAKE=1)
+    pipeline_fake: bool = False  # Phase 3 fake detector (env PIPELINE_FAKE=1; demo/CI only)
+    pipeline_mode: str = "auto"  # 'auto' | 'full' (YOLOv8+InsightFace) | 'lite' (dlib+MediaPipe, CPU)
     llm_fake: bool = False       # deterministic canned LLM for CI (env LLM_FAKE=1)
 
     # No-Redis / no-broker local runner (deploy/run_local.py):

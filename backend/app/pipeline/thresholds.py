@@ -30,6 +30,13 @@ BLUR_LAPLACIAN_VAR = 50
 BLUR_FRAME_FRACTION = 0.30
 SCENE_CUT_THRESHOLD = 27.0
 
+# Lite backend (dlib euclidean metric on 128-d embeddings; same-person guidance < 0.6).
+# Conservative: match threshold well inside the same-person band; the "possible" band
+# runs to dlib's published boundary and is always review-gated in the UI.
+LITE_MATCH_MAX_DIST = 0.45
+LITE_POSSIBLE_MAX_DIST = 0.60
+LITE_REID_MAX_DIST = 0.55
+
 WEAPON_CLASSES = {"knife", "pistol", "rifle", "baseball bat", "scissors"}
 COCO_OBJECT_CLASSES = {
     "knife", "backpack", "handbag", "bottle", "cell phone", "baseball bat",

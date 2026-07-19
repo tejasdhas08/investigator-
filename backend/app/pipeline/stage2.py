@@ -29,6 +29,17 @@ from app.services import audit, progress, storage, timeline_builder
 MODELS_DIR = pathlib.Path(__file__).resolve().parents[3] / "models"
 
 
+def available() -> tuple[bool, str]:
+    try:
+        import insightface  # noqa: F401
+        import ultralytics  # noqa: F401
+    except ImportError as exc:
+        return False, f"missing python package: {exc.name}"
+    if not (MODELS_DIR / "yolov8m.pt").exists():
+        return False, f"weights missing: {MODELS_DIR / 'yolov8m.pt'} (run scripts/fetch_models.py)"
+    return True, "ok"
+
+
 # ---------------------------------------------------------------- model loading
 
 _models: dict = {}
