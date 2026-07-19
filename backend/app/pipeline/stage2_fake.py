@@ -85,6 +85,12 @@ def run(case_id: str) -> None:
             ))
 
         _update_counts(db, case)
+        # match any reference photos uploaded before processing (mirrors real stage2)
+        for ref in db.execute(
+            select(SuspectReference).where(SuspectReference.case_id == case.id,
+                                           SuspectReference.upload_complete)
+        ).scalars():
+            _fake_match(db, case, ref)
         timeline = timeline_builder.build_timeline(db, case, exclude_rejected=False)
         _upload_timeline(case, timeline)
         audit.log(db, action="pipeline.stage2.complete", actor_type="system", case_id=case.id,
@@ -95,38 +101,48 @@ def run(case_id: str) -> None:
 
 
 def match_suspect(case_id: str, ref_id: str) -> None:
-    """Fake matching: Person A scores as a match, others no_match; a reference whose
-    display_name contains 'noface' simulates the no-face-detected rejection."""
     with SessionLocal() as db:
         ref = db.get(SuspectReference, ref_id)
         case = db.get(Case, case_id)
         if ref is None or case is None:
             return
-        if "noface" in ref.display_name.lower():
-            audit.log(db, action="suspect.match.computed", actor_type="system", case_id=case.id,
-                      entity_type="suspect_reference", entity_id=ref.id,
-                      detail={"error": "no_face_detected"})
-            db.commit()
-            return
-        ref.face_detection_confidence = 0.98
-        ref.face_embedding = [0.0] * 512
-        persons = db.execute(select(Person).where(Person.case_id == case.id)).scalars().all()
-        for p in persons:
-            if not p.face_visible:
-                sim, verdict = -1.0, "no_match"
-            elif p.label == "A":
-                sim, verdict = 0.71, "match"
-            else:
-                sim, verdict = 0.31, "no_match"
-            db.add(SuspectMatchResult(
-                suspect_reference_id=ref.id, person_id=p.id,
-                cosine_similarity=sim, verdict=verdict,
-                best_frame_ms=p.first_seen_ms, comparison_face_s3_key=p.face_crop_s3_key,
-            ))
-            audit.log(db, action="suspect.match.computed", actor_type="ai", case_id=case.id,
-                      entity_type="suspect_reference", entity_id=ref.id,
-                      detail={"person_label": p.label, "cosine_similarity": sim, "verdict": verdict})
+        _fake_match(db, case, ref)
         db.commit()
+
+
+def _fake_match(db, case: Case, ref: SuspectReference) -> None:
+    """Fake matching: Person A scores as a match, others no_match; a reference whose
+    display_name contains 'noface' simulates the no-face-detected rejection."""
+    if "noface" in ref.display_name.lower():
+        audit.log(db, action="suspect.match.computed", actor_type="system", case_id=case.id,
+                  entity_type="suspect_reference", entity_id=ref.id,
+                  detail={"error": "no_face_detected"})
+        return
+    ref.face_detection_confidence = 0.98
+    ref.face_embedding = [0.0] * 512
+    persons = db.execute(select(Person).where(Person.case_id == case.id)).scalars().all()
+    existing = {
+        r.person_id for r in db.execute(
+            select(SuspectMatchResult).where(SuspectMatchResult.suspect_reference_id == ref.id)
+        ).scalars()
+    }
+    for p in persons:
+        if p.id in existing:
+            continue
+        if not p.face_visible:
+            sim, verdict = -1.0, "no_match"
+        elif p.label == "A":
+            sim, verdict = 0.71, "match"
+        else:
+            sim, verdict = 0.31, "no_match"
+        db.add(SuspectMatchResult(
+            suspect_reference_id=ref.id, person_id=p.id,
+            cosine_similarity=sim, verdict=verdict,
+            best_frame_ms=p.first_seen_ms, comparison_face_s3_key=p.face_crop_s3_key,
+        ))
+        audit.log(db, action="suspect.match.computed", actor_type="ai", case_id=case.id,
+                  entity_type="suspect_reference", entity_id=ref.id,
+                  detail={"person_label": p.label, "cosine_similarity": sim, "verdict": verdict})
 
 
 def _update_counts(db, case: Case) -> None:
