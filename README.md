@@ -23,7 +23,29 @@ deploy/     docker-compose stack (postgres+pgvector, redis, minio, api, workers,
 models/     CV model weights (fetched by scripts/fetch_models.py; not committed)
 ```
 
-## Quick start (full demo, no GPU / no API key)
+## Quick start — simplest option (no Docker, no Node, no Redis, no WSL)
+
+Only requirement: **Python 3.10+**. Works identically on Windows `cmd`, macOS, or Linux.
+
+```bash
+cd deploy
+python run_local.py
+```
+
+First run installs dependencies into a local venv (~1-2 min) and downloads a static
+ffmpeg build if one isn't already on your PATH. It then opens your browser to
+**http://localhost:8000** automatically. Log in as `investigator@example.gov` /
+`Password123!` (also `supervisor@` / `admin@`, same password). Ctrl+C stops everything;
+state lives in `deploy/.run_local/` — delete that folder to reset.
+
+This single Python process replaces the whole stack for local use: SQLite instead of
+PostgreSQL, an in-process fake S3 server instead of MinIO, synchronous ("eager") task
+execution instead of a separate Celery worker + Redis, and the pre-built frontend served
+directly by FastAPI instead of nginx + Vite. Same code paths, same features — narrative,
+people, timeline, flags, objects, suspect match, Q&A, review, PDF export — just fewer
+moving parts. It's not what you'd run in production; see below for that.
+
+## Docker (closer to the production topology)
 
 ```bash
 cd deploy
@@ -36,10 +58,10 @@ docker compose up --build
 - API docs: http://localhost:8000/api/docs
 - MinIO console: http://localhost:9001
 
-### No Docker? (Windows without Docker Desktop, or any machine with just Python/Node)
+### No Docker, but want Redis/Postgres-like fidelity anyway?
 
 Use WSL (Windows Subsystem for Linux, built into Windows 10/11 — `wsl --install` from an
-admin cmd prompt, no separate download needed) or any Linux/macOS shell, then:
+admin cmd prompt) or any Linux/macOS shell:
 
 ```bash
 sudo apt update && sudo apt install -y python3 python3-venv python3-pip nodejs npm ffmpeg redis-server
@@ -47,10 +69,8 @@ cd deploy
 ./run_local.sh
 ```
 
-This runs the same full demo without Postgres/MinIO/Docker — SQLite instead of Postgres,
-a pure-Python fake S3 server (`moto`) instead of MinIO, real Redis/Celery/ffmpeg. Open
-http://localhost:3000 once it prints "CrimeScene AI is running." Ctrl+C stops everything;
-state lives in `deploy/.run_local/` (gitignored) and is wiped by deleting that folder.
+Same demo, but with a real Redis-backed Celery worker and the Vite dev server on a
+separate port (:3000) — a middle ground between `run_local.py` and the full Docker stack.
 
 Create a case, upload any short mp4 or a photo, start analysis. In fake mode Stage 2
 loads the hand-authored fixture timeline (`backend/tests/fixtures/timeline_fixture.json`)

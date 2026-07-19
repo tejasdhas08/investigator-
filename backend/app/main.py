@@ -51,3 +51,26 @@ app.include_router(chat.router, prefix=prefix)
 app.include_router(exports.router, prefix=prefix)
 app.include_router(audit_api.router, prefix=prefix)
 app.include_router(admin.router, prefix=prefix)
+
+# Optional single-process deployment: serve the pre-built SPA from this same FastAPI
+# process (used by deploy/run_local.py so no Node/nginx is required). No effect on the
+# normal Docker deployment, where nginx serves the frontend and this dir is never set.
+if settings.frontend_dist_dir:
+    import pathlib
+
+    from fastapi.responses import FileResponse
+    from fastapi.staticfiles import StaticFiles
+
+    dist = pathlib.Path(settings.frontend_dist_dir)
+    if dist.is_dir():
+        assets_dir = dist / "assets"
+        if assets_dir.is_dir():
+            app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="spa-assets")
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        async def spa_fallback(full_path: str):
+            # Registered last: /api/*, /healthz, /assets/* above already matched first.
+            requested = dist / full_path
+            if requested.is_file():
+                return FileResponse(str(requested))
+            return FileResponse(str(dist / "index.html"))

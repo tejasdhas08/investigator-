@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     pipeline_fake: bool = False  # Phase 3 fake detector (env PIPELINE_FAKE=1)
     llm_fake: bool = False       # deterministic canned LLM for CI (env LLM_FAKE=1)
 
+    # No-Redis / no-broker local runner (deploy/run_local.py):
+    progress_backend: str = "redis"  # "redis" | "file"
+    progress_dir: str = ".progress"
+    celery_eager: bool = False       # run pipeline tasks synchronously, no worker/broker needed
+    frontend_dist_dir: str = ""      # if set and exists, FastAPI serves the built SPA from here
+
     retention_days: int = 365
 
     max_upload_bytes: int = 4 * 1024**3

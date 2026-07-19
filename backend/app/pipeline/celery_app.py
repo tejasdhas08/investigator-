@@ -2,7 +2,14 @@ from celery import Celery
 
 from app.core.config import settings
 
-celery = Celery("crimescene", broker=settings.redis_url, backend=settings.redis_url)
+# celery_eager=True (deploy/run_local.py's no-Redis path): tasks run synchronously in
+# the calling process the instant .delay()/.apply_async() is called — no broker, no
+# separate worker process. 'memory://' is Celery's own in-process transport, used only
+# to satisfy Celery's config requirement; no actual message passing happens in eager mode.
+broker = "memory://" if settings.celery_eager else settings.redis_url
+backend = "cache+memory://" if settings.celery_eager else settings.redis_url
+
+celery = Celery("crimescene", broker=broker, backend=backend)
 celery.conf.update(
     task_serializer="json",
     result_serializer="json",
@@ -11,6 +18,8 @@ celery.conf.update(
         "app.pipeline.stage2.*": {"queue": "gpu"},
     },
     task_default_queue="cpu",
+    task_always_eager=settings.celery_eager,
+    task_eager_propagates=settings.celery_eager,
     beat_schedule={
         "retention-purge-nightly": {
             "task": "app.pipeline.tasks.retention_purge",
