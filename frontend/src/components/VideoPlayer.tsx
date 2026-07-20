@@ -69,7 +69,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, {
             ? "bg-red-500"
             : e.requires_human_review
               ? "bg-amber-400"
-              : "bg-slate-800/600",
+              : "bg-slate-500",
           label: `${fmtMs(e.start_ms)} ${e.label.replace(/_/g, " ")}${e.person_label ? ` — ${e.person_label}` : ""}`,
           startMs: e.start_ms,
         }))
@@ -128,7 +128,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, {
           <span className="ml-auto flex items-center gap-3 text-[11px] text-slate-500">
             <span><span className="mr-1 inline-block h-2 w-2 rounded-sm bg-red-500" />suspicious</span>
             <span><span className="mr-1 inline-block h-2 w-2 rounded-sm bg-amber-400" />needs review</span>
-            <span><span className="mr-1 inline-block h-2 w-2 rounded-sm bg-slate-800/600" />event</span>
+            <span><span className="mr-1 inline-block h-2 w-2 rounded-sm bg-slate-500" />event</span>
           </span>
           <button
             onClick={() => videoRef.current?.requestFullscreen()}
